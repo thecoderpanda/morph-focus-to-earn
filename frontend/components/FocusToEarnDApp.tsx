@@ -486,26 +486,8 @@ export default function Component() {
   }
 
   const handleDeposit = async () => {
-    if (contract && usdtContract && provider) {
+    if (contract && provider) {
       try {
-        // Check USDT balance
-        const balance = await usdtContract.balanceOf(walletAddress)
-        if (balance.lt(ethers.utils.parseUnits("0.2", 6))) {
-          throw new Error("Insufficient USDT balance")
-        }
-
-        // Check allowance
-        const allowance = await usdtContract.allowance(walletAddress, contractAddress)
-        if (allowance.lt(ethers.utils.parseUnits("0.2", 6))) {
-          throw new Error("Insufficient allowance")
-        }
-
-        // Check user state
-        const userInfo = await contract.getUserInfo(walletAddress)
-        if (userInfo.hasDeposited) {
-          throw new Error("User has already deposited")
-        }
-
         setIsLoading(true)
         const tx = await contract.deposit({ gasLimit: 300000 })
         await tx.wait()
@@ -513,13 +495,8 @@ export default function Component() {
         toast.success("Deposit successful!")
         await updateUserInfo()
       } catch (error) {
-        if (error instanceof Error) {
-          console.error("Failed to deposit:", error)
-          toast.error(`Failed to deposit: ${error.message}`)
-        } else {
-          console.error("Failed to deposit:", error)
-          toast.error("Failed to deposit. Please try again.")
-        }
+        console.error("Failed to deposit:", error)
+        toast.error("Failed to deposit. Please check your balance and try again.")
       } finally {
         setIsLoading(false)
       }
@@ -583,30 +560,22 @@ export default function Component() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-700 to-pink-500 text-white">
       <Toaster position="top-right" />
-      <header className="p-4 bg-black bg-opacity-30 flex flex-col items-center justify-center text-center">
-        <h1 className="text-4xl font-bold mb-2">Focus to Earn</h1>
-        <p className="text-xl mb-4">Boost Your Productivity and Earn Rewards!</p>
-        <p className="text-sm max-w-2xl mb-4">
-          Welcome to Focus to Earn, where your concentration turns into crypto. 
-          Set your timer, stay focused, and watch your rewards grow with every second of productivity.
-        </p>
-        {/* Wallet Connection Button */}
-        <Button
-          onClick={handleConnectWallet}
-          disabled={isLoading}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded-full transition-all duration-200 ease-in-out transform hover:scale-105"
-        >
-          {isLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <WalletIcon className="mr-2 h-4 w-4" />
-          )}
-          {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : 'Connect Wallet'}
-        </Button>
+      <header className="p-4 bg-black bg-opacity-30 flex justify-between items-center">
+        <h1 className="text-2xl font-bold">Focus to Earn</h1>
+        {walletAddress ? (
+          <div className="flex items-center space-x-2 bg-white bg-opacity-20 rounded-full px-4 py-2">
+            <WalletIcon className="h-5 w-5" />
+            <span className="text-sm">{`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}</span>
+          </div>
+        ) : (
+          <Button onClick={handleConnectWallet} className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white border-none" disabled={isLoading}>
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <WalletIcon className="mr-2 h-4 w-4" />}
+            Connect Wallet
+          </Button>
+        )}
       </header>
       <main className="container mx-auto mt-8 p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Existing Timer Card */}
           <Card className="bg-white bg-opacity-10 backdrop-blur-lg border-none shadow-xl">
             <CardHeader>
               <CardTitle className="text-center text-2xl font-bold">Focus Timer</CardTitle>
@@ -656,8 +625,6 @@ export default function Component() {
               )}
             </CardContent>
           </Card>
-          
-          {/* Rewards Card */}
           <Card className="bg-white bg-opacity-10 backdrop-blur-lg border-none shadow-xl">
             <CardHeader>
               <CardTitle className="text-center text-2xl font-bold">Rewards</CardTitle>
@@ -680,28 +647,6 @@ export default function Component() {
             </CardContent>
           </Card>
         </div>
-        
-        {/* How Rewards Work Section */}
-        <Card className="mt-8 bg-white bg-opacity-10 backdrop-blur-lg border-none shadow-xl">
-          <CardHeader>
-            <CardTitle className="text-center text-2xl font-bold">How Rewards Work</CardTitle>
-          </CardHeader>
-          <CardContent className="text-center">
-            <p className="mb-4">
-              Focus to Earn rewards you for your productivity. Here's how it works:
-            </p>
-            <ul className="list-disc list-inside text-left">
-              <li>Deposit 0.2 USDT to start earning rewards</li>
-              <li>Earn 10 FTN tokens per second of focused time</li>
-              <li>Start and stop the timer to track your focus sessions</li>
-              <li>Accumulate rewards based on your total focus time</li>
-              <li>Claim your rewards anytime to receive FTN tokens</li>
-            </ul>
-            <p className="mt-4">
-              The longer you focus, the more you earn. Stay productive and watch your rewards grow!
-            </p>
-          </CardContent>
-        </Card>
       </main>
     </div>
   )
