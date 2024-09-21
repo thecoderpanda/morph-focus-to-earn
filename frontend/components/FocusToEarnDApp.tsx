@@ -558,17 +558,17 @@ export default function Component() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-700 to-pink-500 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-white to-green-100 text-gray-800">
       <Toaster position="top-right" />
-      <header className="p-4 bg-black bg-opacity-30 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Focus to Earn</h1>
+      <header className="p-4 bg-white bg-opacity-80 shadow-md flex justify-between items-center">
+        <h1 className="text-2xl font-bold text-green-600">Focus to Earn</h1>
         {walletAddress ? (
-          <div className="flex items-center space-x-2 bg-white bg-opacity-20 rounded-full px-4 py-2">
-            <WalletIcon className="h-5 w-5" />
-            <span className="text-sm">{`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}</span>
+          <div className="flex items-center space-x-2 bg-green-100 rounded-full px-4 py-2">
+            <WalletIcon className="h-5 w-5 text-green-600" />
+            <span className="text-sm text-green-800">{`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}</span>
           </div>
         ) : (
-          <Button onClick={handleConnectWallet} className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white border-none" disabled={isLoading}>
+          <Button onClick={handleConnectWallet} className="bg-green-500 hover:bg-green-600 text-white border-none" disabled={isLoading}>
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <WalletIcon className="mr-2 h-4 w-4" />}
             Connect Wallet
           </Button>
@@ -576,12 +576,12 @@ export default function Component() {
       </header>
       <main className="container mx-auto mt-8 p-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <Card className="bg-white bg-opacity-10 backdrop-blur-lg border-none shadow-xl">
+          <Card className="bg-white shadow-xl border border-green-200">
             <CardHeader>
-              <CardTitle className="text-center text-2xl font-bold">Focus Timer</CardTitle>
+              <CardTitle className="text-center text-2xl font-bold text-green-700">Focus Timer</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center space-y-6">
-              <div className="text-6xl font-bold tabular-nums bg-white bg-opacity-20 rounded-lg p-4">
+              <div className="text-6xl font-bold tabular-nums bg-green-50 text-green-700 rounded-lg p-4">
                 {`${Math.floor(focusTime / 3600).toString().padStart(2, '0')}:${Math.floor((focusTime % 3600) / 60).toString().padStart(2, '0')}:${(focusTime % 60).toString().padStart(2, '0')}`}
               </div>
               {!hasDeposited ? (
@@ -589,7 +589,7 @@ export default function Component() {
                   <Button 
                     onClick={handleDeposit} 
                     disabled={isLoading}
-                    className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105"
+                    className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105"
                   >
                     {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                     {isLoading ? 'Depositing...' : 'Deposit 0.2 USDT'}
@@ -625,23 +625,23 @@ export default function Component() {
               )}
             </CardContent>
           </Card>
-          <Card className="bg-white bg-opacity-10 backdrop-blur-lg border-none shadow-xl">
+          <Card className="bg-white shadow-xl border border-green-200">
             <CardHeader>
-              <CardTitle className="text-center text-2xl font-bold">Rewards</CardTitle>
+              <CardTitle className="text-center text-2xl font-bold text-green-700">Rewards</CardTitle>
             </CardHeader>
             <CardContent className="flex flex-col items-center space-y-6">
-              <div className="text-4xl font-bold bg-white bg-opacity-20 rounded-lg p-4">
+              <div className="text-4xl font-bold bg-green-50 text-green-700 rounded-lg p-4">
                 {parseFloat(rewards).toFixed(2)} FTN
               </div>
               <Button 
                 onClick={handleClaimRewards} 
                 disabled={parseFloat(rewards) === 0 || isRewardLoading}
-                className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105"
+                className="w-full bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105"
               >
                 {isRewardLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
                 {isRewardLoading ? 'Claiming...' : 'Claim Rewards'}
               </Button>
-              <div className="text-sm bg-white bg-opacity-20 rounded-full px-4 py-2">
+              <div className="text-sm bg-green-50 text-green-700 rounded-full px-4 py-2">
                 Total Claimed: {parseFloat(totalRewardsClaimed).toFixed(2)} FTN
               </div>
             </CardContent>
