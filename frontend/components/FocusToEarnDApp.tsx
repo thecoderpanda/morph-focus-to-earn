@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { ethers } from 'ethers'
-import { ClockIcon, WalletIcon, CoinsIcon } from 'lucide-react'
+import { ClockIcon, WalletIcon, CoinsIcon, Loader2 } from 'lucide-react'
 import { toast, Toaster } from 'react-hot-toast'
 
 declare global {
@@ -12,312 +12,338 @@ declare global {
 }
 
 const contractABI = [
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "_usdtToken",
-                    "type": "address"
-                },
-                {
-                    "internalType": "address",
-                    "name": "_ftnToken",
-                    "type": "address"
-                }
-            ],
-            "stateMutability": "nonpayable",
-            "type": "constructor"
-        },
-        {
-            "inputs": [],
-            "name": "AlreadyDeposited",
-            "type": "error"
-        },
-        {
-            "inputs": [],
-            "name": "claimRewards",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "deposit",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "DepositRequired",
-            "type": "error"
-        },
-        {
-            "inputs": [],
-            "name": "InsufficientRewards",
-            "type": "error"
-        },
-        {
-            "inputs": [],
-            "name": "TimerAlreadyStarted",
-            "type": "error"
-        },
-        {
-            "inputs": [],
-            "name": "TimerNotStarted",
-            "type": "error"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "internalType": "address",
-                    "name": "user",
-                    "type": "address"
-                },
-                {
-                    "indexed": false,
-                    "internalType": "uint256",
-                    "name": "amount",
-                    "type": "uint256"
-                }
-            ],
-            "name": "Deposit",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "internalType": "address",
-                    "name": "user",
-                    "type": "address"
-                },
-                {
-                    "indexed": false,
-                    "internalType": "uint256",
-                    "name": "amount",
-                    "type": "uint256"
-                }
-            ],
-            "name": "RewardsClaimed",
-            "type": "event"
-        },
-        {
-            "inputs": [],
-            "name": "startTimer",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "stopTimer",
-            "outputs": [],
-            "stateMutability": "nonpayable",
-            "type": "function"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "internalType": "address",
-                    "name": "user",
-                    "type": "address"
-                },
-                {
-                    "indexed": false,
-                    "internalType": "uint256",
-                    "name": "startTime",
-                    "type": "uint256"
-                }
-            ],
-            "name": "TimerStarted",
-            "type": "event"
-        },
-        {
-            "anonymous": false,
-            "inputs": [
-                {
-                    "indexed": true,
-                    "internalType": "address",
-                    "name": "user",
-                    "type": "address"
-                },
-                {
-                    "indexed": false,
-                    "internalType": "uint256",
-                    "name": "focusTime",
-                    "type": "uint256"
-                },
-                {
-                    "indexed": false,
-                    "internalType": "uint256",
-                    "name": "rewards",
-                    "type": "uint256"
-                }
-            ],
-            "name": "TimerStopped",
-            "type": "event"
-        },
-        {
-            "inputs": [],
-            "name": "DEPOSIT_AMOUNT",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "FTN_DECIMALS",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "ftnToken",
-            "outputs": [
-                {
-                    "internalType": "contract IERC20",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "_user",
-                    "type": "address"
-                }
-            ],
-            "name": "getUserInfo",
-            "outputs": [
-                {
-                    "internalType": "bool",
-                    "name": "hasDeposited",
-                    "type": "bool"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "totalFocusTime",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "accumulatedRewards",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "bool",
-                    "name": "isTiming",
-                    "type": "bool"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "totalRewardsClaimed",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "USDT_DECIMALS",
-            "outputs": [
-                {
-                    "internalType": "uint256",
-                    "name": "",
-                    "type": "uint256"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [],
-            "name": "usdtToken",
-            "outputs": [
-                {
-                    "internalType": "contract IERC20",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        },
-        {
-            "inputs": [
-                {
-                    "internalType": "address",
-                    "name": "",
-                    "type": "address"
-                }
-            ],
-            "name": "userInfo",
-            "outputs": [
-                {
-                    "internalType": "bool",
-                    "name": "hasDeposited",
-                    "type": "bool"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "totalFocusTime",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "accumulatedRewards",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "uint256",
-                    "name": "lastStartTime",
-                    "type": "uint256"
-                },
-                {
-                    "internalType": "bool",
-                    "name": "isTiming",
-                    "type": "bool"
-                }
-            ],
-            "stateMutability": "view",
-            "type": "function"
-        }
-    ]
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_usdtToken",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "_ftnToken",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "AlreadyDeposited",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "claimRewards",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "deposit",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "DepositRequired",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NoRewardsToClaim",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "TimerAlreadyStarted",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "TimerNotStarted",
+		"type": "error"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "Deposit",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "RewardsClaimed",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "startTimer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "stopTimer",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "startTime",
+				"type": "uint256"
+			}
+		],
+		"name": "TimerStarted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "user",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "focusTime",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "rewards",
+				"type": "uint256"
+			}
+		],
+		"name": "TimerStopped",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "DEPOSIT_AMOUNT",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "FTN_DECIMALS",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "ftnToken",
+		"outputs": [
+			{
+				"internalType": "contract IERC20",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getContractFTNBalance",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_user",
+				"type": "address"
+			}
+		],
+		"name": "getUserInfo",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "hasDeposited",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalFocusTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "accumulatedRewards",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "isTiming",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "REWARD_RATE_PER_SECOND",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalRewardsClaimed",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "USDT_DECIMALS",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "usdtToken",
+		"outputs": [
+			{
+				"internalType": "contract IERC20",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "userInfo",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "hasDeposited",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalFocusTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "accumulatedRewards",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "lastStartTime",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "isTiming",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
 
-const contractAddress = '0x02bb99d5Bc3a0BF7222bf68BA47a2CF5e24629Ea'
-const usdtAddress = '0x9E12AD42c4E4d2acFBADE01a96446e48e6764B98' // Replace with actual USDT token address
+const contractAddress = '0xa525EDf168BB9E9853513a53B328bca2D14295CF'
+const usdtAddress = '0x9E12AD42c4E4d2acFBADE01a96446e48e6764B98'
 
 const morphl2Config = {
   chainId: '0x1f47', // 8007 in decimal
@@ -341,7 +367,7 @@ export default function Component() {
   const [contract, setContract] = useState<ethers.Contract | null>(null)
   const [usdtContract, setUsdtContract] = useState<ethers.Contract | null>(null)
   const [isApproved, setIsApproved] = useState(false)
-  const [isDepositing, setIsDepositing] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null)
 
   useEffect(() => {
@@ -364,6 +390,7 @@ export default function Component() {
   const handleConnectWallet = async () => {
     if (typeof window.ethereum !== 'undefined') {
       try {
+        setIsLoading(true)
         await window.ethereum.request({ method: 'eth_requestAccounts' })
         const web3Provider = new ethers.providers.Web3Provider(window.ethereum)
         setProvider(web3Provider)
@@ -382,10 +409,12 @@ export default function Component() {
         const usdtInstance = new ethers.Contract(usdtAddress, usdtABI, signer)
         setUsdtContract(usdtInstance)
 
-        checkAllowance()
+        await checkAllowance()
       } catch (error) {
         console.error("Failed to connect wallet:", error)
         toast.error("Failed to connect wallet. Please try again.")
+      } finally {
+        setIsLoading(false)
       }
     } else {
       console.error("Metamask is not installed")
@@ -397,7 +426,7 @@ export default function Component() {
     if (usdtContract && walletAddress) {
       try {
         const allowance = await usdtContract.allowance(walletAddress, contractAddress)
-        setIsApproved(allowance.gte(ethers.utils.parseUnits("0.2", 6)))
+        setIsApproved(allowance.gte(ethers.utils.parseUnits("0.2", 18))) // Updated to 18 decimals
       } catch (error) {
         console.error("Failed to check allowance:", error)
         toast.error("Failed to check USDT allowance.")
@@ -408,6 +437,7 @@ export default function Component() {
   const updateUserInfo = async () => {
     if (contract && walletAddress) {
       try {
+        setIsLoading(true)
         const userInfo = await contract.getUserInfo(walletAddress)
         setHasDeposited(userInfo.hasDeposited)
         setFocusTime(userInfo.totalFocusTime.toNumber())
@@ -416,6 +446,8 @@ export default function Component() {
       } catch (error) {
         console.error("Failed to update user info:", error)
         toast.error("Failed to fetch user info. Please try again.")
+      } finally {
+        setIsLoading(false)
       }
     }
   }
@@ -423,11 +455,14 @@ export default function Component() {
   const updateTotalRewardsClaimed = async () => {
     if (contract) {
       try {
+        setIsLoading(true)
         const total = await contract.totalRewardsClaimed()
         setTotalRewardsClaimed(ethers.utils.formatEther(total))
       } catch (error) {
         console.error("Failed to update total rewards claimed:", error)
         toast.error("Failed to fetch total rewards claimed.")
+      } finally {
+        setIsLoading(false)
       }
     }
   }
@@ -435,13 +470,16 @@ export default function Component() {
   const handleApprove = async () => {
     if (usdtContract) {
       try {
-        const approveTx = await usdtContract.approve(contractAddress, ethers.utils.parseUnits("0.2", 6))
+        setIsLoading(true)
+        const approveTx = await usdtContract.approve(contractAddress, ethers.utils.parseUnits("0.2", 18)) // Updated to 18 decimals
         await approveTx.wait()
         setIsApproved(true)
         toast.success("USDT approval successful!")
       } catch (error) {
         console.error("Failed to approve USDT:", error)
         toast.error("Failed to approve USDT. Please try again.")
+      } finally {
+        setIsLoading(false)
       }
     }
   }
@@ -449,16 +487,17 @@ export default function Component() {
   const handleDeposit = async () => {
     if (contract && provider) {
       try {
-        setIsDepositing(true)
-        const tx = await contract.deposit({ gasLimit: 300000 }) // Set a fixed gas limit
+        setIsLoading(true)
+        const tx = await contract.deposit({ gasLimit: 300000 })
         await tx.wait()
         setHasDeposited(true)
         toast.success("Deposit successful!")
+        await updateUserInfo()
       } catch (error) {
         console.error("Failed to deposit:", error)
         toast.error("Failed to deposit. Please check your balance and try again.")
       } finally {
-        setIsDepositing(false)
+        setIsLoading(false)
       }
     }
   }
@@ -466,13 +505,17 @@ export default function Component() {
   const handleStartTimer = async () => {
     if (contract && provider) {
       try {
-        const tx = await contract.startTimer({ gasLimit: 200000 }) // Set a fixed gas limit
+        setIsLoading(true)
+        const tx = await contract.startTimer({ gasLimit: 200000 })
         await tx.wait()
         setIsTimerRunning(true)
         toast.success("Timer started successfully!")
+        await updateUserInfo()
       } catch (error) {
         console.error("Failed to start timer:", error)
         toast.error("Failed to start timer. Please try again.")
+      } finally {
+        setIsLoading(false)
       }
     }
   }
@@ -480,14 +523,17 @@ export default function Component() {
   const handleStopTimer = async () => {
     if (contract && provider) {
       try {
-        const tx = await contract.stopTimer({ gasLimit: 200000 }) // Set a fixed gas limit
+        setIsLoading(true)
+        const tx = await contract.stopTimer({ gasLimit: 200000 })
         await tx.wait()
         setIsTimerRunning(false)
-        updateUserInfo()
         toast.success("Timer stopped successfully!")
+        await updateUserInfo()
       } catch (error) {
         console.error("Failed to stop timer:", error)
         toast.error("Failed to stop timer. Please try again.")
+      } finally {
+        setIsLoading(false)
       }
     }
   }
@@ -495,14 +541,17 @@ export default function Component() {
   const handleClaimRewards = async () => {
     if (contract && provider) {
       try {
-        const tx = await contract.claimRewards({ gasLimit: 300000 }) // Set a fixed gas limit
+        setIsLoading(true)
+        const tx = await contract.claimRewards({ gasLimit: 300000 })
         await tx.wait()
-        updateUserInfo()
-        updateTotalRewardsClaimed()
         toast.success("Rewards claimed successfully!")
+        await updateUserInfo()
+        await updateTotalRewardsClaimed()
       } catch (error) {
         console.error("Failed to claim rewards:", error)
         toast.error("Failed to claim rewards. Please try again.")
+      } finally {
+        setIsLoading(false)
       }
     }
   }
@@ -518,7 +567,8 @@ export default function Component() {
             <span className="text-sm">{`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}</span>
           </div>
         ) : (
-          <Button onClick={handleConnectWallet} variant="outline" className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white border-none">
+          <Button onClick={handleConnectWallet} variant="outline" className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white border-none" disabled={isLoading}>
+            {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <WalletIcon className="mr-2 h-4 w-4" />}
             Connect Wallet
           </Button>
         )}
@@ -537,32 +587,39 @@ export default function Component() {
                 isApproved ? (
                   <Button 
                     onClick={handleDeposit} 
-                    disabled={isDepositing}
+                    disabled={isLoading}
                     className="w-full bg-yellow-500 hover:bg-yellow-600 text-black font-bold py-3 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105"
                   >
-                    {isDepositing ? 'Depositing...' : 'Deposit 0.2 USDT'}
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {isLoading ? 'Depositing...' : 'Deposit 0.2 USDT'}
                   </Button>
                 ) : (
                   <Button 
                     onClick={handleApprove} 
+                    disabled={isLoading}
                     className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105"
                   >
-                    Approve USDT
+                    {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                    {isLoading ? 'Approving...' : 'Approve USDT'}
                   </Button>
                 )
               ) : isTimerRunning ? (
                 <Button 
                   onClick={handleStopTimer} 
+                  disabled={isLoading}
                   className="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-3 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105"
                 >
-                  Stop Timer
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {isLoading ? 'Stopping...' : 'Stop Timer'}
                 </Button>
               ) : (
                 <Button 
                   onClick={handleStartTimer} 
+                  disabled={isLoading}
                   className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105"
                 >
-                  Start Timer
+                  {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  {isLoading ? 'Starting...' : 'Start Timer'}
                 </Button>
               )}
             </CardContent>
@@ -577,10 +634,11 @@ export default function Component() {
               </div>
               <Button 
                 onClick={handleClaimRewards} 
-                disabled={parseFloat(rewards) < 1}
+                disabled={parseFloat(rewards) === 0 || isLoading}
                 className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105"
               >
-                Claim Rewards
+                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {isLoading ? 'Claiming...' : 'Claim Rewards'}
               </Button>
               <div className="text-sm bg-white bg-opacity-20 rounded-full px-4 py-2">
                 Total Claimed: {parseFloat(totalRewardsClaimed).toFixed(2)} FTN
