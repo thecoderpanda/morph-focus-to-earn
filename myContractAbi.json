@@ -17,3 +17,6 @@ const contractABI = [
     {"type":"event","name":"StartFocus","inputs":[{"name":"user","type":"address","indexed":true,"internalType":"address"},{"name":"startTime","type":"uint256","indexed":false,"internalType":"uint256"}],"anonymous":false},
     {"type":"event","name":"StopFocus","inputs":[{"name":"user","type":"address","indexed":true,"internalType":"address"},{"name":"endTime","type":"uint256","indexed":false,"internalType":"uint256"},{"name":"focusDuration","type":"uint256","indexed":false,"internalType":"uint256"},{"name":"rewards","type":"uint256","indexed":false,"internalType":"uint256"}],"anonymous":false}
   ]
+
+  const contractAddress = '0xcbd2b594ccd82f2ded813e38c4fb80ed4ad6f19b' // Replace with actual contract address
+const usdtAddress = '0x9E12AD42c4E4d2acFBADE01a96446e48e6764B98' // Replace with actual USDT token address
