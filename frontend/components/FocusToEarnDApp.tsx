@@ -368,6 +368,7 @@ export default function Component() {
   const [usdtContract, setUsdtContract] = useState<ethers.Contract | null>(null)
   const [isApproved, setIsApproved] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
+  const [isRewardLoading, setIsRewardLoading] = useState(false)
   const [provider, setProvider] = useState<ethers.providers.Web3Provider | null>(null)
 
   useEffect(() => {
@@ -541,7 +542,7 @@ export default function Component() {
   const handleClaimRewards = async () => {
     if (contract && provider) {
       try {
-        setIsLoading(true)
+        setIsRewardLoading(true)
         const tx = await contract.claimRewards({ gasLimit: 300000 })
         await tx.wait()
         toast.success("Rewards claimed successfully!")
@@ -551,7 +552,7 @@ export default function Component() {
         console.error("Failed to claim rewards:", error)
         toast.error("Failed to claim rewards. Please try again.")
       } finally {
-        setIsLoading(false)
+        setIsRewardLoading(false)
       }
     }
   }
@@ -634,11 +635,11 @@ export default function Component() {
               </div>
               <Button 
                 onClick={handleClaimRewards} 
-                disabled={parseFloat(rewards) === 0 || isLoading}
+                disabled={parseFloat(rewards) === 0 || isRewardLoading}
                 className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white font-bold py-3 rounded-lg transition-all duration-200 ease-in-out transform hover:scale-105"
               >
-                {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                {isLoading ? 'Claiming...' : 'Claim Rewards'}
+                {isRewardLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {isRewardLoading ? 'Claiming...' : 'Claim Rewards'}
               </Button>
               <div className="text-sm bg-white bg-opacity-20 rounded-full px-4 py-2">
                 Total Claimed: {parseFloat(totalRewardsClaimed).toFixed(2)} FTN
