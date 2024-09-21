@@ -568,7 +568,7 @@ export default function Component() {
             <span className="text-sm">{`${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}`}</span>
           </div>
         ) : (
-          <Button onClick={handleConnectWallet} variant="outline" className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white border-none" disabled={isLoading}>
+          <Button onClick={handleConnectWallet} className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white border-none" disabled={isLoading}>
             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <WalletIcon className="mr-2 h-4 w-4" />}
             Connect Wallet
           </Button>
